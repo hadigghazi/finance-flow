@@ -58,7 +58,7 @@ function App() {
     return (
       <div className={`app-shell ${state.settings.darkMode ? 'theme-dark' : 'theme-light'}`} dir={localeConfig.dir}>
         <main className="main-content">
-          <WalletLoader title={copy.loadingTitle} description={copy.loadingCopy} label={loadingLabel} />
+          <WalletLoader label={loadingLabel} />
         </main>
       </div>
     );
