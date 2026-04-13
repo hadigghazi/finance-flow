@@ -1,7 +1,7 @@
 import { formatCurrency, formatDate } from '../utils/formatters';
 
-export const GoalList = ({ goals, currency = 'USD' }) => {
-  if (!goals.length) return <div className="empty-state">No saving goals yet. Add one to plan ahead.</div>;
+export const GoalList = ({ goals, currency = 'USD', locale = 'en-US', copy }) => {
+  if (!goals.length) return <div className="empty-state">{copy.noGoals}</div>;
 
   return (
     <div className="goal-list">
@@ -13,7 +13,7 @@ export const GoalList = ({ goals, currency = 'USD' }) => {
               <div>
                 <strong>{goal.name}</strong>
                 <p>
-                  {formatCurrency(goal.currentSaved, currency)} of {formatCurrency(goal.targetAmount, currency)}
+                  {formatCurrency(goal.currentSaved, currency, locale)} {copy.of} {formatCurrency(goal.targetAmount, currency, locale)}
                 </p>
               </div>
               <span className="status-pill neutral">{progress}%</span>
@@ -21,7 +21,7 @@ export const GoalList = ({ goals, currency = 'USD' }) => {
             <div className="progress-track">
               <div className="progress-fill neutral" style={{ width: `${Math.min(progress, 100)}%` }} />
             </div>
-            <small>{goal.deadline ? `Target by ${formatDate(goal.deadline)}` : 'Flexible target date'}</small>
+            <small>{goal.deadline ? `${copy.targetBy} ${formatDate(goal.deadline, locale)}` : copy.flexibleTargetDate}</small>
           </div>
         );
       })}

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Card } from './Card';
 
-export const SettingsPanel = ({ state, actions }) => {
+export const SettingsPanel = ({ state, actions, copy, language, languageOptions }) => {
   const fileRef = useRef(null);
 
   const handleExport = () => {
@@ -23,14 +23,14 @@ export const SettingsPanel = ({ state, actions }) => {
         const parsed = JSON.parse(reader.result);
         actions.importData(parsed);
       } catch {
-        alert('Invalid JSON file');
+        alert(copy.invalidJson);
       }
     };
     reader.readAsText(file);
   };
 
   const handleClear = () => {
-    const confirmed = window.confirm('This will permanently clear your saved data in MongoDB and start you from a blank workspace. Continue?');
+    const confirmed = window.confirm(copy.confirmClear);
     if (confirmed) {
       actions.resetData();
     }
@@ -38,24 +38,34 @@ export const SettingsPanel = ({ state, actions }) => {
 
   return (
     <div className="page-grid two-columns">
-      <Card title="Preferences" subtitle="Personalize the app and update your savings baseline.">
+      <Card title={copy.preferences} subtitle={copy.preferencesSubtitle}>
         <div className="stack-row">
           <label className="field">
-            <span>Starting savings balance</span>
+            <span>{copy.startSavingBalance}</span>
             <input
               type="number"
               value={state.savings.startingBalance}
               onChange={(e) => actions.updateStartingSavings(e.target.value)}
             />
           </label>
+          <label className="field">
+            <span>{copy.language}</span>
+            <select value={language} onChange={(e) => actions.updateLanguage(e.target.value)}>
+              {languageOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label[language]}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </Card>
 
-      <Card title="Data management" subtitle="Your tracker now persists to MongoDB, and you can still back it up locally whenever you want.">
+      <Card title={copy.dataManagement} subtitle={copy.dataManagementSubtitle}>
         <div className="action-group">
-          <button className="primary-button" type="button" onClick={handleExport}>Export JSON</button>
-          <button className="secondary-button" type="button" onClick={() => fileRef.current?.click()}>Import JSON</button>
-          <button className="ghost-action danger-text" type="button" onClick={handleClear}>Clear all saved data</button>
+          <button className="primary-button" type="button" onClick={handleExport}>{copy.exportJson}</button>
+          <button className="secondary-button" type="button" onClick={() => fileRef.current?.click()}>{copy.importJson}</button>
+          <button className="ghost-action danger-text" type="button" onClick={handleClear}>{copy.clearSavedData}</button>
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={handleImport} />
         </div>
       </Card>

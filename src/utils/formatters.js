@@ -1,21 +1,21 @@
-export const formatCurrency = (value, currency = 'USD') =>
-  new Intl.NumberFormat('en-US', {
+export const formatCurrency = (value, currency = 'USD', locale = 'en-US') =>
+  new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     maximumFractionDigits: 0,
   }).format(Number(value || 0));
 
-export const formatMonthLabel = (month) => {
+export const formatMonthLabel = (month, locale = 'en-US') => {
   if (!month) return '';
   const [year, m] = month.split('-');
-  return new Date(Number(year), Number(m) - 1).toLocaleDateString('en-US', {
+  return new Date(Number(year), Number(m) - 1).toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric',
   });
 };
 
-export const formatDate = (date) =>
-  new Date(date).toLocaleDateString('en-US', {
+export const formatDate = (date, locale = 'en-US') =>
+  new Date(date).toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

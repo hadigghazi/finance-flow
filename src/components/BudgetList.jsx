@@ -1,7 +1,7 @@
 import { formatCurrency } from '../utils/formatters';
 
-export const BudgetList = ({ items, currency }) => {
-  if (!items.length) return <div className="empty-state">No budgets set for this month yet.</div>;
+export const BudgetList = ({ items, currency, locale = 'en-US', copy }) => {
+  if (!items.length) return <div className="empty-state">{copy.noBudgets}</div>;
 
   return (
     <div className="budget-list">
@@ -11,7 +11,7 @@ export const BudgetList = ({ items, currency }) => {
             <div>
               <strong>{item.category}</strong>
               <p>
-                {formatCurrency(item.spent, currency)} of {formatCurrency(item.limit, currency)}
+                {formatCurrency(item.spent, currency, locale)} {copy.of} {formatCurrency(item.limit, currency, locale)}
               </p>
             </div>
             <span className={`status-pill ${item.status}`}>{item.percentage}%</span>
@@ -19,7 +19,7 @@ export const BudgetList = ({ items, currency }) => {
           <div className="progress-track">
             <div className={`progress-fill ${item.status}`} style={{ width: `${Math.min(item.percentage, 100)}%` }} />
           </div>
-          <small>{item.remaining >= 0 ? `${formatCurrency(item.remaining, currency)} remaining` : `${formatCurrency(Math.abs(item.remaining), currency)} over budget`}</small>
+          <small>{item.remaining >= 0 ? `${formatCurrency(item.remaining, currency, locale)} ${copy.remaining}` : `${formatCurrency(Math.abs(item.remaining), currency, locale)} ${copy.overBudget}`}</small>
         </div>
       ))}
     </div>

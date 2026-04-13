@@ -10,6 +10,16 @@ import { SettingsPanel } from './components/SettingsPanel';
 import { CategoryPieChart, MonthlyTrendChart, SavingsGrowthChart } from './components/Charts';
 import { useFinance } from './context/FinanceContext';
 import { formatCurrency, formatDate } from './utils/formatters';
+import {
+  buildLocalizedCategoryOptions,
+  getLocaleConfig,
+  incomeTypeOptions,
+  languageOptions,
+  localizeCategory,
+  localizeOptionValue,
+  localizedCategories,
+  paymentMethodOptions,
+} from './utils/i18n';
 
 const today = new Date().toISOString().slice(0, 10);
 
@@ -19,26 +29,36 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState('');
 
+  const language = state.settings.language || 'en';
+  const localeConfig = getLocaleConfig(language);
+  const locale = localeConfig.locale;
+  const copy = localeConfig.common;
+  const appCopy = localeConfig.app;
   const currency = state.settings.currency;
+
+  const localizedCategoryOptions = useMemo(
+    () => buildLocalizedCategoryOptions(state.categories, language),
+    [language, state.categories]
+  );
 
   const filteredExpenses = useMemo(
     () =>
       state.expenses.filter(
         (expense) =>
-          expense.category.toLowerCase().includes(search.toLowerCase()) ||
+          localizeCategory(expense.category, language).toLowerCase().includes(search.toLowerCase()) ||
           expense.subcategory?.toLowerCase().includes(search.toLowerCase()) ||
           expense.notes?.toLowerCase().includes(search.toLowerCase())
       ),
-    [search, state.expenses]
+    [language, search, state.expenses]
   );
 
   if (loading) {
     return (
-      <div className={`app-shell ${state.settings.darkMode ? 'theme-dark' : 'theme-light'} boot-shell`}>
+      <div className={`app-shell ${state.settings.darkMode ? 'theme-dark' : 'theme-light'}`} dir={localeConfig.dir}>
         <main className="main-content">
           <div className="card">
-            <h3>Loading your finance workspace</h3>
-            <p className="boot-copy">Fetching your saved data from MongoDB so you can pick up where you left off.</p>
+            <h3>{copy.loadingTitle}</h3>
+            <p className="boot-copy">{copy.loadingCopy}</p>
           </div>
         </main>
       </div>
@@ -46,79 +66,100 @@ function App() {
   }
 
   const incomeFields = [
-    { name: 'amount', label: 'Amount', type: 'number', required: true },
-    { name: 'date', label: 'Date', type: 'date', required: true, defaultValue: today },
-    { name: 'source', label: 'Source', type: 'text', required: true, placeholder: 'Main job, freelance, gift...' },
-    { name: 'type', label: 'Type', type: 'select', required: true, options: ['salary', 'freelance', 'gift', 'refund', 'other'] },
-    { name: 'notes', label: 'Notes', type: 'textarea', full: true, placeholder: 'Optional notes' },
+    { name: 'amount', label: copy.amount, type: 'number', required: true },
+    { name: 'date', label: copy.date, type: 'date', required: true, defaultValue: today },
+    { name: 'source', label: copy.source, type: 'text', required: true, placeholder: appCopy.income.sourcePlaceholder },
+    { name: 'type', label: copy.type, type: 'select', required: true, options: incomeTypeOptions.map((item) => ({ value: item.value, label: item.label[language] })) },
+    { name: 'notes', label: copy.notes, type: 'textarea', full: true, placeholder: appCopy.income.notesPlaceholder },
   ];
 
   const expenseFields = [
-    { name: 'amount', label: 'Amount', type: 'number', required: true },
-    { name: 'date', label: 'Date', type: 'date', required: true, defaultValue: today },
-    { name: 'category', label: 'Category', type: 'select', required: true, options: state.categories },
-    { name: 'subcategory', label: 'Subcategory', type: 'text', placeholder: 'Groceries, fuel, lunch...' },
-    { name: 'paymentMethod', label: 'Payment Method', type: 'select', options: ['Cash', 'Card', 'Transfer', 'Wallet'], required: true },
-    { name: 'notes', label: 'Notes', type: 'textarea', full: true, placeholder: 'Optional note' },
+    { name: 'amount', label: copy.amount, type: 'number', required: true },
+    { name: 'date', label: copy.date, type: 'date', required: true, defaultValue: today },
+    { name: 'category', label: copy.category, type: 'select', required: true, options: localizedCategoryOptions },
+    { name: 'subcategory', label: copy.subcategory, type: 'text', placeholder: appCopy.expenses.subcategoryPlaceholder },
+    {
+      name: 'paymentMethod',
+      label: copy.paymentMethod,
+      type: 'select',
+      options: paymentMethodOptions.map((item) => ({ value: item.value, label: item.label[language] })),
+      required: true,
+    },
+    { name: 'notes', label: copy.notes, type: 'textarea', full: true, placeholder: appCopy.expenses.notesPlaceholder },
   ];
 
   const savingFields = [
-    { name: 'amount', label: 'Amount saved', type: 'number', required: true },
-    { name: 'date', label: 'Date', type: 'date', required: true, defaultValue: today },
-    { name: 'note', label: 'Note', type: 'textarea', full: true, placeholder: 'Salary top-up, bonus, monthly saving...' },
+    { name: 'amount', label: copy.amountSaved, type: 'number', required: true },
+    { name: 'date', label: copy.date, type: 'date', required: true, defaultValue: today },
+    { name: 'note', label: copy.notes, type: 'textarea', full: true, placeholder: appCopy.savings.notePlaceholder },
   ];
 
   const goalFields = [
-    { name: 'name', label: 'Goal name', type: 'text', required: true },
-    { name: 'targetAmount', label: 'Target amount', type: 'number', required: true },
-    { name: 'currentSaved', label: 'Current saved', type: 'number', required: true },
-    { name: 'deadline', label: 'Deadline', type: 'date' },
-    { name: 'notes', label: 'Notes', type: 'textarea', full: true, placeholder: 'Optional notes' },
+    { name: 'name', label: appCopy.goals.name, type: 'text', required: true },
+    { name: 'targetAmount', label: copy.targetAmount, type: 'number', required: true },
+    { name: 'currentSaved', label: copy.currentSaved, type: 'number', required: true },
+    { name: 'deadline', label: copy.deadline, type: 'date' },
+    { name: 'notes', label: copy.notes, type: 'textarea', full: true, placeholder: appCopy.goals.notesPlaceholder },
   ];
 
   const budgetFields = [
-    { name: 'month', label: 'Month', type: 'month', required: true, defaultValue: analytics.currentMonth },
-    { name: 'category', label: 'Category', type: 'select', required: true, options: state.categories },
-    { name: 'limit', label: 'Budget limit', type: 'number', required: true },
+    { name: 'month', label: copy.month, type: 'month', required: true, defaultValue: analytics.currentMonth },
+    { name: 'category', label: copy.category, type: 'select', required: true, options: localizedCategoryOptions },
+    { name: 'limit', label: appCopy.budgets.limit, type: 'number', required: true },
   ];
 
   const dashboard = (
     <div className="page-grid">
       <div className="stats-grid">
-        <StatCard label="Income this month" value={analytics.incomeThisMonth} helper="All salary and other inflows" currency={currency} />
-        <StatCard label="Expenses this month" value={analytics.expensesThisMonth} helper="Everything you spent so far" tone="danger" currency={currency} />
-        <StatCard label="Net balance" value={analytics.netThisMonth} helper="Income minus expenses" tone={analytics.netThisMonth >= 0 ? 'success' : 'danger'} currency={currency} />
-        <StatCard label="Total savings" value={analytics.totalSavings} helper="Starting balance + saved + goal reserves" tone="highlight" currency={currency} />
+        <StatCard label={appCopy.dashboard.incomeThisMonth} value={analytics.incomeThisMonth} helper={appCopy.dashboard.incomeHelper} currency={currency} locale={locale} />
+        <StatCard label={appCopy.dashboard.expensesThisMonth} value={analytics.expensesThisMonth} helper={appCopy.dashboard.expensesHelper} tone="danger" currency={currency} locale={locale} />
+        <StatCard label={appCopy.dashboard.netBalance} value={analytics.netThisMonth} helper={appCopy.dashboard.netHelper} tone={analytics.netThisMonth >= 0 ? 'success' : 'danger'} currency={currency} locale={locale} />
+        <StatCard label={appCopy.dashboard.totalSavings} value={analytics.totalSavings} helper={appCopy.dashboard.totalSavingsHelper} tone="highlight" currency={currency} locale={locale} />
       </div>
 
       <div className="page-grid two-columns">
-        <Card title="Monthly cash flow" subtitle="Compare monthly income and expenses at a glance.">
-          <MonthlyTrendChart data={analytics.monthlyTrend} currency={currency} />
+        <Card title={appCopy.dashboard.monthlyCashFlow} subtitle={appCopy.dashboard.monthlyCashFlowSubtitle}>
+          <MonthlyTrendChart data={analytics.monthlyTrend} currency={currency} locale={locale} />
         </Card>
-        <Card title="Spending by category" subtitle="Where your money is going this month.">
-          <CategoryPieChart data={analytics.categoryTotals} currency={currency} />
+        <Card title={appCopy.dashboard.spendingByCategory} subtitle={appCopy.dashboard.spendingByCategorySubtitle}>
+          <CategoryPieChart
+            data={analytics.categoryTotals.map((item) => ({ ...item, name: localizeCategory(item.name, language) }))}
+            currency={currency}
+            locale={locale}
+          />
         </Card>
       </div>
 
       <div className="page-grid two-columns">
-        <Card title="Budget usage" subtitle="See where you're close to the limit.">
-          <BudgetList items={analytics.budgetStatus} currency={currency} />
+        <Card title={appCopy.dashboard.budgetUsage} subtitle={appCopy.dashboard.budgetUsageSubtitle}>
+          <BudgetList
+            items={analytics.budgetStatus.map((item) => ({ ...item, category: localizeCategory(item.category, language) }))}
+            currency={currency}
+            locale={locale}
+            copy={copy}
+          />
         </Card>
-        <Card title="Saving goals progress" subtitle="Track dedicated goals separately from general savings.">
-          <GoalList goals={state.goals} currency={currency} />
+        <Card title={appCopy.dashboard.goalProgress} subtitle={appCopy.dashboard.goalProgressSubtitle}>
+          <GoalList goals={state.goals} currency={currency} locale={locale} copy={copy} />
         </Card>
       </div>
 
-      <Card title="Recent transactions" subtitle="Latest money movements across income and expenses.">
+      <Card title={appCopy.dashboard.recentTransactions} subtitle={appCopy.dashboard.recentTransactionsSubtitle}>
         <div className="transactions-stack">
           {analytics.recentTransactions.map((item) => (
             <div key={item.id} className="recent-item">
               <div>
-                <strong>{item.entryType === 'income' ? item.source : item.category}</strong>
-                <p>{formatDate(item.date)} | {item.entryType === 'income' ? item.type : item.paymentMethod}</p>
+                <strong>{item.entryType === 'income' ? item.source : localizeCategory(item.category, language)}</strong>
+                <p>
+                  {formatDate(item.date, locale)} |{' '}
+                  {item.entryType === 'income'
+                    ? localizeOptionValue(incomeTypeOptions, item.type, language)
+                    : localizeOptionValue(paymentMethodOptions, item.paymentMethod, language)}
+                </p>
               </div>
               <span className={item.entryType === 'income' ? 'positive' : 'negative'}>
-                {item.entryType === 'income' ? '+' : '-'}{formatCurrency(item.amount, currency)}
+                {item.entryType === 'income' ? '+' : '-'}
+                {formatCurrency(item.amount, currency, locale)}
               </span>
             </div>
           ))}
@@ -129,103 +170,133 @@ function App() {
 
   const incomePage = (
     <div className="page-grid two-columns">
-      <Card title="Add income" subtitle="Log salary, freelance work, gifts, refunds, and more.">
-        <FormSection fields={incomeFields} onSubmit={actions.addIncome} submitLabel="Add income entry" />
+      <Card title={appCopy.income.addIncome} subtitle={appCopy.income.addIncomeSubtitle}>
+        <FormSection fields={incomeFields} onSubmit={actions.addIncome} submitLabel={appCopy.income.submit} selectLabel={copy.select} />
       </Card>
-      <Card title="Income history" subtitle="All recorded income entries.">
-        <TransactionList items={state.incomes} type="income" currency={currency} onDelete={(id) => actions.deleteEntry('incomes', id)} />
+      <Card title={appCopy.income.incomeHistory} subtitle={appCopy.income.incomeHistorySubtitle}>
+        <TransactionList
+          items={state.incomes.map((item) => ({
+            ...item,
+            type: localizeOptionValue(incomeTypeOptions, item.type, language),
+          }))}
+          type="income"
+          currency={currency}
+          locale={locale}
+          copy={copy}
+          onDelete={(id) => actions.deleteEntry('incomes', id)}
+        />
       </Card>
     </div>
   );
 
   const expensesPage = (
     <div className="page-grid two-columns">
-      <Card title="Add expense" subtitle="Keep track of everything you spend.">
-        <FormSection fields={expenseFields} onSubmit={actions.addExpense} submitLabel="Add expense entry" />
+      <Card title={appCopy.expenses.addExpense} subtitle={appCopy.expenses.addExpenseSubtitle}>
+        <FormSection fields={expenseFields} onSubmit={actions.addExpense} submitLabel={appCopy.expenses.submit} selectLabel={copy.select} />
         <div className="inline-actions">
-          <input type="text" placeholder="Add custom category" onKeyDown={(e) => {
-            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-              actions.addCategory(e.currentTarget.value.trim());
-              e.currentTarget.value = '';
-            }
-          }} />
+          <input
+            type="text"
+            placeholder={copy.addCustomCategory}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                actions.addCategory(e.currentTarget.value.trim());
+                e.currentTarget.value = '';
+              }
+            }}
+          />
         </div>
       </Card>
       <Card
-        title="Expense history"
-        subtitle="Search by category, subcategory, or notes."
-        action={<input className="search-input" placeholder="Search expenses" value={search} onChange={(e) => setSearch(e.target.value)} />}
+        title={appCopy.expenses.expenseHistory}
+        subtitle={appCopy.expenses.expenseHistorySubtitle}
+        action={<input className="search-input" placeholder={copy.searchExpenses} value={search} onChange={(e) => setSearch(e.target.value)} />}
       >
-        <TransactionList items={filteredExpenses} type="expense" currency={currency} onDelete={(id) => actions.deleteEntry('expenses', id)} />
+        <TransactionList
+          items={filteredExpenses.map((item) => ({
+            ...item,
+            category: localizeCategory(item.category, language),
+            paymentMethod: localizeOptionValue(paymentMethodOptions, item.paymentMethod, language),
+          }))}
+          type="expense"
+          currency={currency}
+          locale={locale}
+          copy={copy}
+          onDelete={(id) => actions.deleteEntry('expenses', id)}
+        />
       </Card>
     </div>
   );
 
   const savingsPage = (
     <div className="page-grid two-columns">
-      <Card title="Savings overview" subtitle="Separate starting savings, general savings, and goal reserves clearly.">
+      <Card title={appCopy.savings.overview} subtitle={appCopy.savings.overviewSubtitle}>
         <div className="stats-grid single-column">
-          <StatCard label="Starting savings" value={state.savings.startingBalance} helper="Existing balance before using the app" currency={currency} />
-          <StatCard label="General money saved" value={state.savings.generalSaved} helper="Savings added through normal saving entries" tone="success" currency={currency} />
-          <StatCard label="Reserved for goals" value={analytics.goalReserved} helper="Money currently allocated to saving goals" tone="highlight" currency={currency} />
-          <StatCard label="Total savings balance" value={analytics.totalSavings} helper="Your complete savings picture" tone="highlight" currency={currency} />
+          <StatCard label={appCopy.savings.startingSavings} value={state.savings.startingBalance} helper={appCopy.savings.startingSavingsHelper} currency={currency} locale={locale} />
+          <StatCard label={appCopy.savings.generalSaved} value={state.savings.generalSaved} helper={appCopy.savings.generalSavedHelper} tone="success" currency={currency} locale={locale} />
+          <StatCard label={appCopy.savings.reservedForGoals} value={analytics.goalReserved} helper={appCopy.savings.reservedForGoalsHelper} tone="highlight" currency={currency} locale={locale} />
+          <StatCard label={appCopy.savings.totalSavingsBalance} value={analytics.totalSavings} helper={appCopy.savings.totalSavingsBalanceHelper} tone="highlight" currency={currency} locale={locale} />
         </div>
       </Card>
-      <Card title="Add savings entry" subtitle="Record money you want to add to your general savings pool.">
-        <FormSection fields={savingFields} onSubmit={actions.addSavingsEntry} submitLabel="Add savings entry" />
+      <Card title={appCopy.savings.addSavingsEntry} subtitle={appCopy.savings.addSavingsEntrySubtitle}>
+        <FormSection fields={savingFields} onSubmit={actions.addSavingsEntry} submitLabel={appCopy.savings.submit} selectLabel={copy.select} />
       </Card>
-      <Card title="Savings growth" subtitle="Watch your total saved amount grow over time." className="span-2">
-        <SavingsGrowthChart data={analytics.savingsGrowth} currency={currency} />
+      <Card title={appCopy.savings.savingsGrowth} subtitle={appCopy.savings.savingsGrowthSubtitle} className="span-2">
+        <SavingsGrowthChart data={analytics.savingsGrowth} currency={currency} locale={locale} />
       </Card>
     </div>
   );
 
   const goalsPage = (
     <div className="page-grid two-columns">
-      <Card title="Create saving goal" subtitle="Track dedicated money targets like a laptop, phone, trip, or emergency fund.">
-        <FormSection fields={goalFields} onSubmit={actions.addGoal} submitLabel="Create goal" />
+      <Card title={appCopy.goals.createGoal} subtitle={appCopy.goals.createGoalSubtitle}>
+        <FormSection fields={goalFields} onSubmit={actions.addGoal} submitLabel={appCopy.goals.submit} selectLabel={copy.select} />
       </Card>
-      <Card title="Active goals" subtitle="See progress and target dates clearly.">
-        <GoalList goals={state.goals} currency={currency} />
+      <Card title={appCopy.goals.activeGoals} subtitle={appCopy.goals.activeGoalsSubtitle}>
+        <GoalList goals={state.goals} currency={currency} locale={locale} copy={copy} />
       </Card>
     </div>
   );
 
   const budgetsPage = (
     <div className="page-grid two-columns">
-      <Card title="Create monthly budget" subtitle="Set category limits and see warnings as you approach them.">
-        <FormSection fields={budgetFields} onSubmit={actions.addBudget} submitLabel="Save budget" />
+      <Card title={appCopy.budgets.createBudget} subtitle={appCopy.budgets.createBudgetSubtitle}>
+        <FormSection fields={budgetFields} onSubmit={actions.addBudget} submitLabel={appCopy.budgets.submit} selectLabel={copy.select} />
       </Card>
-      <Card title="Budget status" subtitle="Live progress for the current month.">
-        <BudgetList items={analytics.budgetStatus} currency={currency} />
+      <Card title={appCopy.budgets.budgetStatus} subtitle={appCopy.budgets.budgetStatusSubtitle}>
+        <BudgetList
+          items={analytics.budgetStatus.map((item) => ({ ...item, category: localizeCategory(item.category, language) }))}
+          currency={currency}
+          locale={locale}
+          copy={copy}
+        />
       </Card>
     </div>
   );
 
   const analyticsPage = (
     <div className="page-grid two-columns">
-      <Card title="Monthly income vs expenses" subtitle="A clearer view of your financial rhythm.">
-        <MonthlyTrendChart data={analytics.monthlyTrend} currency={currency} />
+      <Card title={appCopy.analytics.monthlyIncomeVsExpenses} subtitle={appCopy.analytics.monthlyIncomeVsExpensesSubtitle}>
+        <MonthlyTrendChart data={analytics.monthlyTrend} currency={currency} locale={locale} />
       </Card>
-      <Card title="Savings growth over time" subtitle="How your savings balance changes month to month.">
-        <SavingsGrowthChart data={analytics.savingsGrowth} currency={currency} />
+      <Card title={appCopy.analytics.savingsGrowthOverTime} subtitle={appCopy.analytics.savingsGrowthOverTimeSubtitle}>
+        <SavingsGrowthChart data={analytics.savingsGrowth} currency={currency} locale={locale} />
       </Card>
-      <Card title="Top categories this month" subtitle="Largest expense areas right now.">
+      <Card title={appCopy.analytics.topCategories} subtitle={appCopy.analytics.topCategoriesSubtitle}>
         <div className="list-stack">
           {analytics.topCategories.map((item) => (
             <div className="list-item" key={item.category}>
-              <span>{item.category}</span>
-              <strong>{formatCurrency(item.amount, currency)}</strong>
+              <span>{localizeCategory(item.category, language)}</span>
+              <strong>{formatCurrency(item.amount, currency, locale)}</strong>
             </div>
           ))}
         </div>
       </Card>
-      <Card title="Monthly overview" subtitle="Fast summary for the current month.">
+      <Card title={appCopy.analytics.monthlyOverview} subtitle={appCopy.analytics.monthlyOverviewSubtitle}>
         <div className="list-stack">
-          <div className="list-item"><span>Income</span><strong>{formatCurrency(analytics.incomeThisMonth, currency)}</strong></div>
-          <div className="list-item"><span>Expenses</span><strong>{formatCurrency(analytics.expensesThisMonth, currency)}</strong></div>
-          <div className="list-item"><span>Net</span><strong>{formatCurrency(analytics.netThisMonth, currency)}</strong></div>
-          <div className="list-item"><span>Total savings</span><strong>{formatCurrency(analytics.totalSavings, currency)}</strong></div>
+          <div className="list-item"><span>{copy.income}</span><strong>{formatCurrency(analytics.incomeThisMonth, currency, locale)}</strong></div>
+          <div className="list-item"><span>{copy.expenses}</span><strong>{formatCurrency(analytics.expensesThisMonth, currency, locale)}</strong></div>
+          <div className="list-item"><span>{appCopy.dashboard.netBalance}</span><strong>{formatCurrency(analytics.netThisMonth, currency, locale)}</strong></div>
+          <div className="list-item"><span>{appCopy.dashboard.totalSavings}</span><strong>{formatCurrency(analytics.totalSavings, currency, locale)}</strong></div>
         </div>
       </Card>
     </div>
@@ -239,7 +310,16 @@ function App() {
     goals: goalsPage,
     budgets: budgetsPage,
     analytics: analyticsPage,
-    settings: <SettingsPanel state={state} actions={actions} />,
+    settings: (
+      <SettingsPanel
+        state={state}
+        actions={actions}
+        copy={copy}
+        locale={locale}
+        language={language}
+        languageOptions={languageOptions}
+      />
+    ),
   };
 
   return (

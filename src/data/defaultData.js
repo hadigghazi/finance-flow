@@ -23,6 +23,7 @@ export const createEmptyData = () => ({
   settings: {
     currency: 'USD',
     darkMode: false,
+    language: 'en',
   },
   savings: {
     startingBalance: 0,

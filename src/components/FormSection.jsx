@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export const FormSection = ({ fields, onSubmit, submitLabel = 'Save', title }) => {
+export const FormSection = ({ fields, onSubmit, submitLabel = 'Save', title, selectLabel = 'Select' }) => {
   const initialState = fields.reduce((acc, field) => ({ ...acc, [field.name]: field.defaultValue || '' }), {});
   const [form, setForm] = useState(initialState);
 
@@ -20,10 +20,10 @@ export const FormSection = ({ fields, onSubmit, submitLabel = 'Save', title }) =
           <span>{field.label}</span>
           {field.type === 'select' ? (
             <select value={form[field.name]} onChange={(e) => handleChange(field.name, e.target.value)} required={field.required}>
-              <option value="">Select</option>
+              <option value="">{selectLabel}</option>
               {field.options.map((option) => (
-                <option key={option} value={option}>
-                  {option}
+                <option key={typeof option === 'string' ? option : option.value} value={typeof option === 'string' ? option : option.value}>
+                  {typeof option === 'string' ? option : option.label}
                 </option>
               ))}
             </select>

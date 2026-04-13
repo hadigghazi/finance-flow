@@ -16,22 +16,22 @@ import { formatCurrency, formatMonthLabel } from '../utils/formatters';
 
 const fallbackColors = ['#0084b6', '#2fa7df', '#005a7d', '#7ac9ee', '#1bb36a', '#d68a00'];
 
-const CustomTooltip = ({ active, payload, label, currency }) => {
+const CustomTooltip = ({ active, payload, label, currency, locale = 'en-US' }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="chart-tooltip">
-      <p>{label?.includes('-') ? formatMonthLabel(label) : label}</p>
+      <p>{label?.includes('-') ? formatMonthLabel(label, locale) : label}</p>
       {payload.map((entry) => (
         <div key={entry.name} className="tooltip-row">
           <span>{entry.name}</span>
-          <strong>{formatCurrency(entry.value, currency)}</strong>
+          <strong>{formatCurrency(entry.value, currency, locale)}</strong>
         </div>
       ))}
     </div>
   );
 };
 
-export const MonthlyTrendChart = ({ data, currency }) => (
+export const MonthlyTrendChart = ({ data, currency, locale = 'en-US' }) => (
   <div className="chart-box">
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data}>
@@ -46,9 +46,9 @@ export const MonthlyTrendChart = ({ data, currency }) => (
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
-        <XAxis dataKey="month" tickFormatter={formatMonthLabel} tickLine={false} axisLine={false} />
+        <XAxis dataKey="month" tickFormatter={(value) => formatMonthLabel(value, locale)} tickLine={false} axisLine={false} />
         <YAxis tickLine={false} axisLine={false} />
-        <Tooltip content={<CustomTooltip currency={currency} />} />
+        <Tooltip content={<CustomTooltip currency={currency} locale={locale} />} />
         <Bar dataKey="income" fill="url(#incomeBar)" radius={[10, 10, 0, 0]} />
         <Bar dataKey="expenses" fill="url(#expenseBar)" radius={[10, 10, 0, 0]} />
       </BarChart>
@@ -56,7 +56,7 @@ export const MonthlyTrendChart = ({ data, currency }) => (
   </div>
 );
 
-export const CategoryPieChart = ({ data, currency }) => (
+export const CategoryPieChart = ({ data, currency, locale = 'en-US' }) => (
   <div className="chart-box">
     <ResponsiveContainer width="100%" height={280}>
       <PieChart>
@@ -65,13 +65,13 @@ export const CategoryPieChart = ({ data, currency }) => (
             <Cell key={index} fill={fallbackColors[index % fallbackColors.length]} />
           ))}
         </Pie>
-        <Tooltip content={<CustomTooltip currency={currency} />} />
+        <Tooltip content={<CustomTooltip currency={currency} locale={locale} />} />
       </PieChart>
     </ResponsiveContainer>
   </div>
 );
 
-export const SavingsGrowthChart = ({ data, currency }) => (
+export const SavingsGrowthChart = ({ data, currency, locale = 'en-US' }) => (
   <div className="chart-box">
     <ResponsiveContainer width="100%" height={280}>
       <AreaChart data={data}>
@@ -82,9 +82,9 @@ export const SavingsGrowthChart = ({ data, currency }) => (
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
-        <XAxis dataKey="month" tickFormatter={formatMonthLabel} tickLine={false} axisLine={false} />
+        <XAxis dataKey="month" tickFormatter={(value) => formatMonthLabel(value, locale)} tickLine={false} axisLine={false} />
         <YAxis tickLine={false} axisLine={false} />
-        <Tooltip content={<CustomTooltip currency={currency} />} />
+        <Tooltip content={<CustomTooltip currency={currency} locale={locale} />} />
         <Area type="monotone" dataKey="savings" stroke="#0084b6" strokeWidth={3} fill="url(#savingsArea)" />
       </AreaChart>
     </ResponsiveContainer>

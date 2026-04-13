@@ -90,8 +90,20 @@ a {
   overflow-y: auto;
 }
 
+.app-shell[dir="rtl"] .sidebar {
+  left: auto;
+  right: -100%;
+  border-right: 0;
+  border-left: 1px solid var(--border);
+}
+
 .sidebar.open {
   left: 0;
+}
+
+.app-shell[dir="rtl"] .sidebar.open {
+  left: auto;
+  right: 0;
 }
 
 .sidebar-scrim {
@@ -171,6 +183,10 @@ a {
   cursor: pointer;
   text-align: left;
   transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.app-shell[dir="rtl"] .nav-item {
+  text-align: right;
 }
 
 .nav-item:hover {
@@ -254,6 +270,32 @@ a {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.app-shell[dir="rtl"] .topbar,
+.app-shell[dir="rtl"] .card-header,
+.app-shell[dir="rtl"] .budget-header-row,
+.app-shell[dir="rtl"] .recent-item,
+.app-shell[dir="rtl"] .list-item {
+  direction: rtl;
+}
+
+.app-shell[dir="rtl"] .topbar-left,
+.app-shell[dir="rtl"] .topbar-right,
+.app-shell[dir="rtl"] .brand,
+.app-shell[dir="rtl"] .stat-card-label-row {
+  flex-direction: row-reverse;
+}
+
+.app-shell[dir="rtl"] .page-intro,
+.app-shell[dir="rtl"] .card-copy,
+.app-shell[dir="rtl"] .field,
+.app-shell[dir="rtl"] .data-table th,
+.app-shell[dir="rtl"] .data-table td,
+.app-shell[dir="rtl"] .empty-state,
+.app-shell[dir="rtl"] .goal-card,
+.app-shell[dir="rtl"] .budget-item {
+  text-align: right;
 }
 
 .icon-button, .ghost-button, .ghost-action {
@@ -432,6 +474,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .field.full, .full {
@@ -448,6 +491,8 @@ a {
 
 input, select, textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   background: var(--panel-soft);
   border: 1px solid var(--border);
   color: var(--ink);
@@ -455,6 +500,12 @@ input, select, textarea {
   padding: 13px 14px;
   outline: none;
   transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+input[type="date"],
+input[type="month"] {
+  min-width: 0;
+  max-width: 100%;
 }
 
 input:hover, select:hover, textarea:hover {
@@ -715,11 +766,13 @@ input::placeholder, textarea::placeholder {
   .sidebar {
     position: sticky;
     left: auto;
+    right: auto;
     width: auto;
     padding: 22px 18px;
     box-shadow: none;
     background: transparent;
     border-right: 1px solid var(--border);
+    border-left: 0;
   }
 
   .sidebar-scrim,

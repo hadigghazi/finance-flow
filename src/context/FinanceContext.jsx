@@ -151,6 +151,11 @@ export const FinanceProvider = ({ children }) => {
         ...prev,
         settings: { ...prev.settings, darkMode: !prev.settings.darkMode },
       })),
+    updateLanguage: (value) =>
+      persistState((prev) => ({
+        ...prev,
+        settings: { ...prev.settings, language: value },
+      })),
     deleteEntry: (collection, id) =>
       persistState((prev) => ({
         ...prev,
