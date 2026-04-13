@@ -16,7 +16,10 @@ export const FormSection = ({ fields, onSubmit, submitLabel = 'Save', title, sel
     <form className="form-grid" onSubmit={handleSubmit}>
       {title && <div className="form-title">{title}</div>}
       {fields.map((field) => (
-        <label key={field.name} className={field.full ? 'field full' : 'field'}>
+        <label
+          key={field.name}
+          className={`${field.full ? 'field full' : 'field'} ${field.type === 'date' || field.type === 'month' ? 'field-compact-date' : ''}`}
+        >
           <span>{field.label}</span>
           {field.type === 'select' ? (
             <select value={form[field.name]} onChange={(e) => handleChange(field.name, e.target.value)} required={field.required}>
