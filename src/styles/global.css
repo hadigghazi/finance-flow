@@ -345,8 +345,267 @@ a {
   padding-bottom: 0;
 }
 
+.boot-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 18px;
+}
+
+.boot-card {
+  position: relative;
+  width: min(100%, 460px);
+  padding: 28px 22px 24px;
+  border-radius: 30px;
+  border: 1px solid var(--border-strong);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.92)),
+    linear-gradient(135deg, rgba(0, 132, 182, 0.08), rgba(47, 167, 223, 0.02));
+  box-shadow: 0 30px 80px rgba(10, 41, 61, 0.14);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.theme-dark .boot-card {
+  background:
+    linear-gradient(180deg, rgba(16, 32, 45, 0.9), rgba(16, 32, 45, 0.98)),
+    linear-gradient(135deg, rgba(99, 194, 235, 0.18), rgba(99, 194, 235, 0.04));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
+}
+
+.boot-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 29px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.theme-dark .boot-card::after {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.boot-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(10px);
+  opacity: 0.65;
+  z-index: -1;
+}
+
+.boot-orb-left {
+  top: -36px;
+  left: -34px;
+  width: 124px;
+  height: 124px;
+  background: rgba(0, 132, 182, 0.2);
+}
+
+.boot-orb-right {
+  right: -18px;
+  bottom: 48px;
+  width: 94px;
+  height: 94px;
+  background: rgba(27, 179, 106, 0.18);
+}
+
+.boot-loader-wrap {
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+}
+
+.wallet-loader {
+  --wallet-color: #12627d;
+  --wallet-dark: #08384a;
+  --bill-color: #b9f1dc;
+  --bill-detail: #1d8f69;
+  --txt-color: #ffffff;
+  --duration: 4s;
+  position: relative;
+  width: 150px;
+  height: 112px;
+}
+
+.theme-dark .wallet-loader {
+  --wallet-color: #1c7fa0;
+  --wallet-dark: #0f4f67;
+  --bill-color: #d5fae8;
+  --bill-detail: #2da579;
+}
+
+.wallet-loader .wallet-back {
+  position: absolute;
+  bottom: 15px;
+  left: 8px;
+  width: 134px;
+  height: 58px;
+  background: linear-gradient(180deg, rgba(8, 56, 74, 0.95), rgba(8, 56, 74, 0.8));
+  border-radius: 12px 12px 6px 6px;
+  z-index: 0;
+}
+
+.wallet-loader .bill {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -30px;
+  width: 92px;
+  height: 52px;
+  background: linear-gradient(180deg, var(--bill-color), #8de3c3);
+  border-radius: 8px;
+  border: 1px solid var(--bill-detail);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wallet-loader .bill::before {
+  content: "$";
+  font-family: 'Segoe UI', 'Aptos', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--bill-detail);
+  border: 2px solid var(--bill-detail);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.wallet-loader .bill::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: 5px;
+  bottom: 5px;
+  border: 1px dashed rgba(29, 143, 105, 0.55);
+  border-radius: 6px;
+}
+
+.wallet-loader .bill-1 {
+  z-index: 1;
+  animation: walletSlideIn var(--duration) ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.wallet-loader .bill-2 {
+  z-index: 2;
+  animation: walletSlideIn var(--duration) ease-in-out infinite;
+  animation-delay: 0.8s;
+}
+
+.wallet-loader .bill-3 {
+  z-index: 3;
+  animation: walletSlideIn var(--duration) ease-in-out infinite;
+  animation-delay: 1.6s;
+}
+
+.wallet-loader .wallet-front {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 150px;
+  height: 68px;
+  background: linear-gradient(180deg, var(--wallet-color), var(--wallet-dark));
+  border-radius: 18px;
+  z-index: 10;
+  box-shadow: 0 12px 22px rgba(8, 56, 74, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: walletBounce var(--duration) ease-in-out infinite;
+}
+
+.wallet-loader .wallet-front::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  pointer-events: none;
+}
+
+.wallet-loader .wallet-front::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 18px;
+  width: 30px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.wallet-loader .text {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1px;
+  font-family: 'Segoe UI', 'Aptos', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--txt-color);
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.wallet-loader .dot {
+  display: inline-block;
+  min-width: 0.35em;
+  animation: walletWave 1.5s infinite;
+}
+
+.wallet-loader .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.wallet-loader .dot:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.wallet-loader .dot:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.boot-copy-block {
+  text-align: center;
+}
+
+.boot-kicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.boot-title {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Lato', 'Segoe UI', sans-serif;
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  line-height: 1.1;
+}
+
 .boot-copy {
+  margin: 12px auto 0;
+  max-width: 31ch;
   color: var(--muted);
+  font-size: 0.97rem;
+  line-height: 1.6;
 }
 
 .page-grid {
@@ -742,6 +1001,65 @@ input::placeholder, textarea::placeholder {
   }
 }
 
+@keyframes walletSlideIn {
+  0% {
+    top: -30px;
+    opacity: 0;
+    transform: translateX(-50%) scale(0.84);
+  }
+  10% {
+    opacity: 1;
+  }
+  24% {
+    top: 24px;
+    transform: translateX(-50%) scale(1);
+  }
+  90% {
+    top: 24px;
+    opacity: 1;
+  }
+  100% {
+    top: 24px;
+    opacity: 0;
+  }
+}
+
+@keyframes walletBounce {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(1.02, 0.98);
+  }
+  15% {
+    transform: scale(1);
+  }
+  32% {
+    transform: scale(1.02, 0.98);
+  }
+  35% {
+    transform: scale(1);
+  }
+  52% {
+    transform: scale(1.02, 0.98);
+  }
+  55% {
+    transform: scale(1);
+  }
+}
+
+@keyframes walletWave {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation: none !important;
@@ -753,6 +1071,14 @@ input::placeholder, textarea::placeholder {
 @media (min-width: 640px) {
   .content-stage {
     padding: 16px 20px 28px;
+  }
+
+  .boot-screen {
+    padding: 28px;
+  }
+
+  .boot-card {
+    padding: 34px 30px 30px;
   }
 
   .form-grid {
@@ -781,6 +1107,31 @@ input::placeholder, textarea::placeholder {
 }
 
 @media (max-width: 639px) {
+  .boot-card {
+    border-radius: 24px;
+  }
+
+  .wallet-loader {
+    width: 132px;
+    height: 102px;
+  }
+
+  .wallet-loader .wallet-back {
+    width: 118px;
+    height: 52px;
+  }
+
+  .wallet-loader .wallet-front {
+    width: 132px;
+    height: 62px;
+    border-radius: 16px;
+  }
+
+  .wallet-loader .bill {
+    width: 82px;
+    height: 48px;
+  }
+
   .form-grid,
   .form-grid > .field,
   .form-grid > .full,

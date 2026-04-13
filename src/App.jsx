@@ -8,6 +8,7 @@ import { BudgetList } from './components/BudgetList';
 import { GoalList } from './components/GoalList';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CategoryPieChart, MonthlyTrendChart, SavingsGrowthChart } from './components/Charts';
+import { WalletLoader } from './components/WalletLoader';
 import { useFinance } from './context/FinanceContext';
 import { formatCurrency, formatDate } from './utils/formatters';
 import {
@@ -35,6 +36,7 @@ function App() {
   const copy = localeConfig.common;
   const appCopy = localeConfig.app;
   const currency = state.settings.currency;
+  const loadingLabel = language === 'ar' ? 'جارٍ التحميل' : 'Loading';
 
   const localizedCategoryOptions = useMemo(
     () => buildLocalizedCategoryOptions(state.categories, language),
@@ -56,10 +58,7 @@ function App() {
     return (
       <div className={`app-shell ${state.settings.darkMode ? 'theme-dark' : 'theme-light'}`} dir={localeConfig.dir}>
         <main className="main-content">
-          <div className="card">
-            <h3>{copy.loadingTitle}</h3>
-            <p className="boot-copy">{copy.loadingCopy}</p>
-          </div>
+          <WalletLoader title={copy.loadingTitle} description={copy.loadingCopy} label={loadingLabel} />
         </main>
       </div>
     );
